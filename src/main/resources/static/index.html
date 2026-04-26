@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas - Barbería</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f4c3a; /* Verde oscuro premium */
+            --secondary: #e74c3c;
+            --background: #ecf0f1;
+            --surface: #ffffff;
+            --text: #333333;
+            --success: #27ae60;
+            --border: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Outfit', 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            --primary: #3498db;
+            --background: #1a1a1a;
+            --surface: #2d2d2d;
+            --text: #f5f6fa;
+            --border: #444;
+        }
+
+        body.dark-mode input {
+            background-color: #3d3d3d;
+            color: #f5f6fa;
+        }
+
+        body.dark-mode th {
+            background-color: #3d3d3d;
+        }
+
+        body.dark-mode .alert.success {
+            background: linear-gradient(to right, #064e3b, #065f46);
+            color: #a7f3d0;
+            border-left-color: #34d399;
+        }
+
+        body.dark-mode .alert.error {
+            background: linear-gradient(to right, #7f1d1d, #991b1b);
+            color: #fecaca;
+            border-left-color: #f87171;
+        }
+
+        h1,
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: grid;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--surface);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        input[type="datetime-local"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), #072a1e);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #155e49, var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        button.cancel-btn {
+            background: linear-gradient(135deg, var(--secondary), #c0392b);
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.2);
+        }
+
+        button.cancel-btn:hover {
+            background: linear-gradient(135deg, #c0392b, #a53125);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .alert.success {
+            background: linear-gradient(to right, #f0fdf4, #dcfce7);
+            color: #166534;
+            border-left: 5px solid #22c55e;
+            display: flex;
+            align-items: center;
+        }
+        .alert.success::before { content: "✨ "; margin-right: 8px; }
+
+        .alert.error {
+            background: linear-gradient(to right, #fef2f2, #fee2e2);
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
+            display: flex;
+            align-items: center;
+        }
+        .alert.error::before { content: "⚠️ "; margin-right: 8px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-RESERVADA {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-CANCELADA {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: transform 0.4s ease, background-color 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(128, 128, 128, 0.2);
+        }
+
+        .theme-toggle.animate {
+            transform: rotate(360deg) scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Alternar tema">🌙</button>
+
+    <div class="container">
+        <h1>Mauricio Barbery</h1>
+
+        <div id="messageBox" class="alert"></div>
+
+        <div class="card">
+            <h2>Nueva Cita</h2>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="clienteNombre">Nombre del Cliente *</label>
+                    <input type="text" id="clienteNombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="clienteEmail">Email *</label>
+                    <input type="email" id="clienteEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="clienteTelefono">Teléfono</label>
+                    <input type="tel" id="clienteTelefono">
+                </div>
+                <div class="form-group">
+                    <label for="fechaHora">Fecha y Hora *</label>
+                    <input type="datetime-local" id="fechaHora" required>
+                </div>
+                <div class="form-group">
+                    <label for="duracionMin">Duración (minutos)</label>
+                    <input type="number" id="duracionMin" placeholder="30" min="1">
+                </div>
+                <button type="submit">Reservar Cita</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Citas Programadas</h2>
+            <div class="form-group">
+                <label>Filtros</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="text" id="filterNombre" placeholder="Buscar por Nombre">
+                    <input type="email" id="filterEmail" placeholder="Buscar por Email">
+                    <button type="button" onclick="loadAppointments()">Filtrar</button>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Fecha/Hora</th>
+                            <th>Duración</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                        <!-- Appointments will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api/appointments';
+        const form = document.getElementById('appointmentForm');
+        const messageBox = document.getElementById('messageBox');
+        const tableBody = document.getElementById('appointmentsTableBody');
+        const themeToggleBtn = document.getElementById('themeToggle');
+
+        // Dark mode logic
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeToggleBtn.textContent = '☀️';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+
+            // Trigger animation
+            themeToggleBtn.classList.remove('animate');
+            void themeToggleBtn.offsetWidth; // force reflow
+            themeToggleBtn.classList.add('animate');
+
+            if (isDark) {
+                themeToggleBtn.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeToggleBtn.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function showMessage(msg, isError = false) {
+            messageBox.textContent = msg;
+            messageBox.className = 'alert ' + (isError ? 'error' : 'success');
+            messageBox.style.display = ''; // Remover estilo inline que lo oculta
+            setTimeout(() => {
+                messageBox.className = 'alert';
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const payload = {
+                clienteNombre: document.getElementById('clienteNombre').value,
+                clienteEmail: document.getElementById('clienteEmail').value,
+                clienteTelefono: document.getElementById('clienteTelefono').value || null,
+                fechaHora: document.getElementById('fechaHora').value,
+                duracionMin: document.getElementById('duracionMin').value ? parseInt(document.getElementById('duracionMin').value) : null
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    showMessage('Cita reservada con éxito.');
+                    form.reset();
+                    loadAppointments();
+                } else {
+                    const errorData = await response.json();
+                    showMessage(errorData.error || 'Error al reservar la cita.', true);
+                }
+            } catch (error) {
+                showMessage('Error de conexión con el servidor.', true);
+            }
+        });
+
+        async function loadAppointments() {
+            const emailFilter = document.getElementById('filterEmail').value;
+            const nombreFilter = document.getElementById('filterNombre').value;
+
+            let url = new URL(API_URL, window.location.origin);
+            if (emailFilter) url.searchParams.append('clienteEmail', emailFilter);
+            if (nombreFilter) url.searchParams.append('clienteNombre', nombreFilter);
+
+            try {
+                const response = await fetch(url.toString());
+                if (response.ok) {
+                    const appointments = await response.json();
+                    renderTable(appointments);
+                } else {
+                    showMessage('Error al cargar las citas.', true);
+                }
+            } catch (error) {
+                showMessage('Error de conexión con el servidor.', true);
+            }
+        }
+
+        function renderTable(appointments) {
+            tableBody.innerHTML = '';
+
+            if (appointments.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay citas registradas.</td></tr>';
+                return;
+            }
+
+            appointments.forEach(app => {
+                const date = new Date(app.fechaHora).toLocaleString('es-ES');
+                const row = document.createElement('tr');
+
+                let cancelBtn = '';
+                if (app.estado === 'RESERVADA') {
+                    cancelBtn = `<button class="cancel-btn" onclick="cancelAppointment(${app.id})">Cancelar</button>`;
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <strong>${app.clienteNombre}</strong><br>
+                        <small style="color: #7f8c8d;">${app.clienteEmail}</small>
+                        ${app.clienteTelefono ? `<br><small style="color: #7f8c8d;">Tel: ${app.clienteTelefono}</small>` : ''}
+                    </td>
+                    <td>${date}</td>
+                    <td>${app.duracionMin} min</td>
+                    <td><span class="status-badge status-${app.estado}">${app.estado}</span></td>
+                    <td>${cancelBtn}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function cancelAppointment(id) {
+            if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Cita cancelada con éxito.');
+                    loadAppointments();
+                } else {
+                    showMessage('Error al cancelar la cita.', true);
+                }
+            } catch (error) {
+                showMessage('Error de conexión con el servidor.', true);
+            }
+        }
+
+        // Load initially
+        loadAppointments();
+    </script>
+</body>
+
+</html>
